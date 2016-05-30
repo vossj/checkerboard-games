@@ -1,5 +1,5 @@
-#ifndef __CHESS_H__
-#define __CHESS_H__
+#ifndef __CHESSOBJS_H__
+#define __CHESSOBJS_H__
 
 #include <vector>
 #include <iostream>
@@ -57,10 +57,15 @@ namespace Chess
     {
     public:
 	Position();
-	void Print( std::ostream & out );
+	/* Initializes to an empty position.  As the position is empty,
+	   castling validity is assumed false by default. */
+	
+	void Print( std::ostream & out ) const;
 	
 	Piece & operator[]( const std::string & coord );
 	const Piece operator[]( const std::string & coord ) const;
+	/* Access to the piece at the boord location given by coord.
+	   All coordinates are assumed to be in algebraic notation. */
 	    
 	static bool ValidCoordinate( const std::string & coord );
 	/* Returns whether a coordinate is a valid location on a chess
@@ -73,6 +78,9 @@ namespace Chess
 	
     };
 
+
+    std::ostream & operator<<(std::ostream & out, const Position & p);
+    /* Prints the chess position p to the output stream out. */
 }
 
 #endif

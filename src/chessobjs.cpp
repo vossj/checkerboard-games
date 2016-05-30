@@ -1,11 +1,10 @@
-#include "chess.h"
+#include "chessobjs.h"
 
 #include <cassert>
 #include <iostream>
 
 using namespace Chess;
 using namespace std;
-
 Move::Move()
 {
     ShortCastle = false;
@@ -50,7 +49,7 @@ const Piece Position::operator[]( const string & coord ) const
     return Board[coord[0]-'a'][coord[1]-'1'];
 }
 
-void Position::Print( ostream & out )
+void Position::Print( ostream & out ) const
 {
     for ( char row = '8' ; row >= '1' ; row-- ) {
 	// print row labels
@@ -100,6 +99,13 @@ void Position::Print( ostream & out )
 	out << " " << col << " ";
     }
     out << endl;
+}
+
+ostream & operator<<(ostream & out, const Position & p)
+{
+    p.Print( out );
+    
+    return out;
 }
 
 int main()
