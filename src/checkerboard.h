@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 
 namespace CheckerBoard
 {
@@ -20,13 +21,13 @@ namespace CheckerBoard
         // Piece declarations
         const Piece NONE = 0;
         const Piece LIGHT_STANDARD =
-            PieceFlags::OCCUPIED & PieceFlags::LIGHT_PIECE;
+            PieceFlags::OCCUPIED | PieceFlags::LIGHT_PIECE;
         const Piece LIGHT_KING =
-            PieceFlags::LIGHT_STANDARD & PieceFlags::KING;
+            PieceFlags::LIGHT_STANDARD | PieceFlags::KING;
         const Piece DARK_STANDARD =
-            PieceFlags::OCCUPIED & PieceFlags::DARK_PIECE;
+            PieceFlags::OCCUPIED | PieceFlags::DARK_PIECE;
         const Piece DARK_KING =
-            PieceFlags::DARK_STANDARD & PieceFlags::KING;
+            PieceFlags::DARK_STANDARD | PieceFlags::KING;
     }
     
     /* Standard 8 x 8 checker board for playing English Draughts.  It consists
@@ -36,9 +37,21 @@ namespace CheckerBoard
     class CheckerBoard
     {
     public:
-        // Creates an empty checkers board
         CheckerBoard();
+	/* Creates an empty checkerboard */
 
+	void SetInitialPos();
+	void SetInitialPos(const char * GameName );
+	/* Sets the initial position for the game in question.
+	 * Default (no string passed in, or an empty string) is
+	 * English Draughts.  Names are not case sensitive.
+	 *
+	 * Options:
+	 * "English Draughts"
+	 * None other currently supported.
+	 */
+	
+	
         // Get and set what piece is in a board location
         Piece SetPiece( Piece p, int loc );
         inline Piece GetPiece( int loc ) const { return Board[loc - 1]; }
@@ -54,11 +67,14 @@ namespace CheckerBoard
         inline bool IsOccupied( int loc ) const
         { return PieceFlags::OCCUPIED & GetPiece( loc ); }
 
+	void print(std::ostream& out);
+
     protected:
 
         std::vector<Piece> Board;
     };
 }
 
-
+std::ostream& operator<<(std::ostream& out,
+			 const CheckerBoard::CheckerBoard & cboard );
 
