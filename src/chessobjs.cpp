@@ -5,6 +5,50 @@
 
 using namespace Chess;
 using namespace std;
+
+Chess::Piece::Piece()
+{
+    Value = Pieces::NONE;
+}
+
+Chess::Piece::Piece( ProtoPiece p )
+{
+    Value = p;
+}
+
+bool Piece::IsValid()
+{
+    if ((*this) == Pieces::NONE)
+	return true;
+
+    // A piece should consist of exactly one color and a single piece
+    // type among the valid ranges, and no other bits.
+
+    // Check that the piece has exactly one color set.
+    if (IsWhite() == IsBlack())
+	return false;
+
+    // Check that the piece type is valid
+    ProtoPiece PieceType = (*this) & PieceFlags::TYPE_MASK;
+    if (PieceType > PieceFlags::TYPE_MAX)
+	return false;
+    
+    // Check no extra bits of information
+    return ((*this) & ( PieceFlags::COLOR_MASK |
+			PieceFlags::TYPE_MASK )) == (*this);
+}
+
+Piece::operator ProtoPiece() const
+{
+    return Value;
+}
+
+Piece & Piece::operator=(const ProtoPiece & p)
+{
+    Value = ProtoPiece(p);
+    return (*this);
+}
+
 Move::Move()
 {
     ShortCastle = false;
@@ -31,22 +75,28 @@ bool Position::ValidCoordinate( const string & coord )
 	return false;
 
     // Check actual coordinate is valid
-    return ('a' <= coord[0]) && (coord[0] <= 'h') &&
-	('1' <= coord[1]) && (coord[1] <= '8');
+    char File = GetFile(coord);
+    char Rank = GetRank(coord);
+    return ('a' <= File) && (File <= 'h') &&
+	('1' <= Rank) && (Rank <= '8');
 }
 
 Piece & Position::operator[]( const string & coord )
 {
     assert( Position::ValidCoordinate(coord) );
 
-    return Board[coord[0]-'a'][coord[1]-'1'];
+    char Rank = GetRank(coord);
+    char File = GetFile(coord);
+    return Board[File-'a'][Rank-'1'];
 }
 
 const Piece Position::operator[]( const string & coord ) const
 {
     assert( Position::ValidCoordinate( coord ) );
 
-    return Board[coord[0]-'a'][coord[1]-'1'];
+    char Rank = GetRank( coord );
+    char File = GetFile( coord );
+    return Board[File-'a'][Rank-'1'];
 }
 
 void Position::Print( ostream & out ) const
@@ -101,17 +151,9 @@ void Position::Print( ostream & out ) const
     out << endl;
 }
 
-ostream & operator<<(ostream & out, const Position & p)
+ostream & Chess::operator<<(ostream & out, const Position & p)
 {
     p.Print( out );
     
     return out;
-}
-
-int main()
-{
-    Position P;
-    P.Print( cout );
-    
-    return 0;
 }
