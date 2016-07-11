@@ -79,17 +79,17 @@ namespace Chess
     namespace Pieces {
 	// Declarations of actual pieces
 	const Piece NONE = PieceFlags::NONE;
-	const Piece WHITE_PAWN = PieceFlags::PAWN;
+	const Piece WHITE_PAWN = PieceFlags::PAWN | PieceFlags::WHITE;
 	const Piece BLACK_PAWN = PieceFlags::PAWN | PieceFlags::BLACK;
-	const Piece WHITE_KNIGHT = PieceFlags::KNIGHT;
+	const Piece WHITE_KNIGHT = PieceFlags::KNIGHT | PieceFlags::WHITE;
 	const Piece BLACK_KNIGHT = PieceFlags::KNIGHT | PieceFlags::BLACK;
-	const Piece WHITE_BISHOP = PieceFlags::BISHOP;
+	const Piece WHITE_BISHOP = PieceFlags::BISHOP | PieceFlags::WHITE;
 	const Piece BLACK_BISHOP = PieceFlags::BISHOP | PieceFlags::BLACK;
-	const Piece WHITE_ROOK = PieceFlags::ROOK;
+	const Piece WHITE_ROOK = PieceFlags::ROOK | PieceFlags::WHITE;
 	const Piece BLACK_ROOK = PieceFlags::ROOK | PieceFlags::BLACK;
-	const Piece WHITE_QUEEN = PieceFlags::QUEEN;
+	const Piece WHITE_QUEEN = PieceFlags::QUEEN | PieceFlags::WHITE;
 	const Piece BLACK_QUEEN = PieceFlags::QUEEN | PieceFlags::BLACK;
-	const Piece WHITE_KING = PieceFlags::KING;
+	const Piece WHITE_KING = PieceFlags::KING | PieceFlags::WHITE;
 	const Piece BLACK_KING = PieceFlags::KING | PieceFlags::BLACK;
     };
 
@@ -121,30 +121,71 @@ namespace Chess
     class Position
     {
     public:
-	Position();
-	/* Initializes to an empty position.  As the position is empty,
-	   castling validity is assumed false by default. */
+	// MEMBER FUNCTIONS -----------------------------------------------
+	void ExecuteMove( const Move & m );
 
-	void Print( std::ostream & out ) const;
+	void GenLegalMoves(std::vector< Move > & Moves);
+	/* Overwrites the vector Moves with a list of the legal moves
+	   for the current position.
+
+	   Note: Behaviour is not standardly defined when more than
+	   the proper number of kings of a particular color is on the
+	   board.  When too few kings are on the board, then moves are
+	   still generated as if the position were legal.
+	*/
+	
+        // Pull properly formatted rank or file from a coordinate
+	static char GetRank( const std::string & coord ) { return coord[1]; }
+	static char GetFile( const std::string & coord )
+	    { return tolower(coord[0]); }
 	
 	Piece & operator[]( const std::string & coord );
 	const Piece operator[]( const std::string & coord ) const;
 	/* Access to the piece at the boord location given by coord.
 	   All coordinates are assumed to be in algebraic notation. */
-	    
+
+	Position();
+	/* Initializes to an empty position.  As the position is empty,
+	   castling validity is assumed false by default. */
+
+	void Print( std::ostream & out ) const;
+
+	void RetractMove( const Move & m );
+	/* Undo the move m.
+
+	   WARNING: Does not keep track of EnPessante legality or the 1st
+	   moves of rooks and kings.  These require additional game state
+	   information than is provided here. */
+	
+	
+	void SetToEmptyPosition();
+	
+	void SetToInitialPosition();
+	/* Sets the position to the games initial position */
+	
 	static bool ValidCoordinate( const std::string & coord );
 	/* Returns whether a coordinate is a valid location on a chess
 	 * board.  Coordinates should be compatible with algebraic
 	 * chess notation.
 	 */
 
-	// Pull properly formatted rank or file from a coordinate
-	static char GetRank( const std::string & coord ) { return coord[1]; }
-	static char GetFile( const std::string & coord )
-	    { return tolower(coord[0]); }
-    protected:
-	Piece Board[8][8];
+	// PUBLICALLY ACCESSIBLE MEMBER VARIABLES -------------------------
 	
+	// Information required to keep track of special moves
+	bool WKMoved, BKMoved;    /* Keep track of whether either the white
+				     or black king has moved during the game. */
+	bool a1RMoved, h1RMoved, a8RMoved, h8RMoved;
+	/* Keep track of which rooks have moved during the game. */
+	std::string EPPLocale;    /* Store the location of a pawn which on the 
+				     prior ply/move has moved 2 spots and is 
+				     thus potentially susceptible to en 
+				     passante.  If no such move, then this 
+				     should be empty. */
+	bool WhiteToMove;
+
+	
+    protected:
+	Piece Board[8][8];        // Actual board	
     };
 
 
